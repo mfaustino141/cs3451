@@ -29,8 +29,11 @@ inline void SortEdgeVertices(Edge &edge)
 inline int FindTheOtherVertex(const Triangle &tri, int v0, int v1) 
 {
     /* your implementation for 2.(1) starts */	
-
-
+	for(int i = 0; i < 3; i++){
+		if(tri[i] != v0 && tri[i] != v1){
+			return tri[i];
+		}
+	}
 	/* your implementation for 2.(1) ends */
 		
 	return -1;	// return -1 if cannot find the other vertex except v0 and v1
@@ -45,8 +48,7 @@ inline Vertex SmoothOddVtx(const std::vector<Vertex> &old_vtx, const int p0, con
 	Vertex smoothed_odd_vtx = Vertex(0.0,0.0,0.0);
 
     /* your implementation for 2.(2) starts */	
-
-
+	smoothed_odd_vtx = 0.375f * (old_vtx[p0] + old_vtx[p1]) + 0.125f * (old_vtx[p2] + old_vtx[p3]);
     /* your implementation for 2.(2) ends */	
 	
 	return smoothed_odd_vtx;
@@ -62,8 +64,17 @@ inline Vertex SmoothEvenVtx(const std::vector<Vertex> &old_vtx, int v, const std
 	Vertex smoothed_even_vtx = Vertex(0.0,0.0,0.0);
 
     /* your implementation for 3.(1) starts */	
-
-
+	int n = nbs.size();
+	float B;
+	if(n == 3){
+		B = 0.1875f;
+	}else{
+		B = 3.0f / (8.0f * n);
+	}
+	smoothed_even_vtx = (1.0f - (n * B)) * old_vtx[v];
+	for(int i = 0; i < n; i++){
+		smoothed_even_vtx += B * old_vtx[nbs[i]];
+	}
     /* your implementation for 3.(1) ends */	
 
 	return smoothed_even_vtx;
@@ -118,8 +129,9 @@ inline void LoopSubdivision(TriangleMesh<3> &mesh)
 			if (edge_vtx_map.find(edge) == edge_vtx_map.end()){
 
 				/* your implementation for 1.(1) starts */
-				
-				
+				new_vtx_pos = (old_vtx[edge[0]] + old_vtx[edge[1]]) * 0.5f;
+    			new_vtx.push_back(new_vtx_pos);
+				new_vtx_idx = new_vtx.size() - 1;
 				/* your implementation for 1.(1) ends */
 				
 				edge_vtx_map[edge] = new_vtx_idx;	// update the edge_vtx_map with the index of the added vertex
@@ -131,8 +143,10 @@ inline void LoopSubdivision(TriangleMesh<3> &mesh)
 		// Step 1.(2): You will add four new triangles to new_tri. Make sure all triangles follow a counterclockwise order.
 		
 		/* your implementation for 1.(2) starts */
-		
-
+		new_tri.push_back(Triangle(tri[0], tri_mid[0], tri_mid[2]));
+		new_tri.push_back(Triangle(tri[1], tri_mid[1], tri_mid[0]));
+		new_tri.push_back(Triangle(tri[2], tri_mid[2], tri_mid[1]));
+		new_tri.push_back(Triangle(tri_mid[0], tri_mid[1], tri_mid[2]));
 		/* your implementation for 1.(2) ends */
 	}
 
@@ -180,8 +194,7 @@ inline void LoopSubdivision(TriangleMesh<3> &mesh)
 		// Step 2.(3): call SmoothOddVtx() to calculate the new position for each odd vertex
 
 		/* your implementation for 2.(3) starts */
-
-		
+		new_vtx[v] = SmoothOddVtx(old_vtx, p0, p1, p2, p3);
 		/* your implementation for 2.(3) ends */
 	}
 
@@ -216,7 +229,7 @@ inline void LoopSubdivision(TriangleMesh<3> &mesh)
 		// Step 3.(2) call SmoothEvenVtx() to calculate the new position for each even vertex
 
 		/* your implementation for 3.(2) starts */
-		
+		new_vtx[v] = SmoothEvenVtx(old_vtx, v, nbs);
 		/* your implementation for 3.(2) ends */
 	}
 
