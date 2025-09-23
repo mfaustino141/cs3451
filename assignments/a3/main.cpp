@@ -51,11 +51,14 @@ public:
 
 	virtual void Initialize_Data()
 	{
-		Create_Background(OpenGLColor(0.71f, 0.6f, 0.17f, 1.f), OpenGLColor(0.71f, 0.87f, 0.17f, 1.f));
+		Create_Background(OpenGLColor(0.53f, 0.81f, 0.98f, 1.f), OpenGLColor(0.13f, 0.56f, 0.92f, 1.f));
 		OpenGLShaderLibrary::Instance()->Add_Shader_From_File("a3_vert.vert", "a3_frag.frag", "a3_shading");	////bind shader for this assignment
 
-		Create_Angry_Bird_Palace();					////TODO: Comment this line when you start to implement your customized scene
-		//// Create_Angry_Bird_Garden();			////TODO: Uncomment this line when you start to implement your customized scene
+		//og background colors: OpenGLColor(0.71f, 0.6f, 0.17f, 1.f), OpenGLColor(0.71f, 0.87f, 0.17f, 1.f)
+		//custom sky colors: OpenGLColor(0.53f, 0.81f, 0.98f, 1.f), OpenGLColor(0.13f, 0.56f, 0.92f, 1.f)
+
+		// Create_Angry_Bird_Palace();					////TODO: Comment this line when you start to implement your customized scene
+		Create_Angry_Bird_Garden();			////TODO: Uncomment this line when you start to implement your customized scene
 
 	}
 
@@ -81,9 +84,9 @@ public:
 		auto castle = Add_Obj_Mesh_Object_From_File("castle.obj", OpenGLColor(.6f, .6f, .6f, 1.f));
 		{
 			Matrix4f t;
-			t << 1., 0., 0., 0.,
-				0., 1., 0., 0.,
-				0., 0., 1., 0.,
+			t << 0., 0., 5., 0.,
+				0., 5., 0., 1.3,
+				-5., 0., 0., 0.,
 				0., 0., 0., 1.;
 
 			castle->Set_Model_Matrix(t);
@@ -100,9 +103,9 @@ public:
 		auto axes = Add_Obj_Mesh_Object_From_File("axes.obj", OpenGLColor(.9f, .5f, .0f, 1.f));
 		{
 			Matrix4f t;
-			t << 1., 0., 0., 0.,
-				0., 1., 0., 0.,
-				0., 0., 1., 0.,
+			t << 0., 0., 2., 6.,
+				0., 2., 0., 1.,
+				-2., 0., 0., 0.,
 				0., 0., 0., 1.;
 
 			axes->Set_Model_Matrix(t);
@@ -119,9 +122,9 @@ public:
 		auto tower = Add_Obj_Mesh_Object_From_File("tower.obj", OpenGLColor(.0f, .5f, .5f, 1.f));
 		{
 			Matrix4f t;
-			t << 1., 0., 0., 0.,
-				0., 1., 0., 0.,
-				0., 0., 1., 0.,
+			t << sqrt(2.), 0., -sqrt(2.), -6.,
+				0., 6., 0., 3.,
+				sqrt(2.), 0., sqrt(2.), 0.,
 				0., 0., 0., 1.;
 
 			tower->Set_Model_Matrix(t);
@@ -136,13 +139,17 @@ public:
 		 
 		/* Your implementation starts. You may add/remove/edit any part of the code in the following. */
 		int tree_num = 24;
+		float pi = 3.14159265358979323846f;
 		for (int i = 0; i < tree_num; i++) {
 			auto tree = Add_Obj_Mesh_Object_From_File("tree1.obj", OpenGLColor(0.f, 1.f, 0.f, 1.f));
+
+			float angle = (2.0f * pi / tree_num) * i;
+
 			{
 				Matrix4f t;
-				t << 1., 0., 0., 0.,
-					0., 1., 0., 0.,
-					0., 0., 1., 0.,
+				t << 1., 0., 0., 8 * cos(angle),
+					0., 1., 0., 0.5,
+					0., 0., 1., 8 * sin(angle),
 					0., 0., 0., 1.;
 				tree->Set_Model_Matrix(t);
 			}
@@ -159,11 +166,14 @@ public:
 		int tree2_num = 36;
 		for (int i = 0; i < tree2_num; i++) {
 			auto tree = Add_Obj_Mesh_Object_From_File("tree2.obj", OpenGLColor(0.f, 1.f, 0.f, 1.f));
+
+			float angle = (2.0f * pi / tree2_num) * i;
+
 			{
 				Matrix4f t;
-				t << 1., 0., 0., 0.,
-					0., 1., 0., 0.,
-					0., 0., 1., 0.,
+				t << 1., 0., 0., 10 * cos(angle),
+					0., 1., 0., 0.5,
+					0., 0., 1., 10 * sin(angle),
 					0., 0., 0., 1.;
 				tree->Set_Model_Matrix(t);
 			}
@@ -182,8 +192,8 @@ public:
 			{
 				Matrix4f t;
 				t << 1., 0., 0., 0.,
-					0., 1., 0., 0.,
-					0., 0., 1., 0.,
+					0., 0.1, 0., 0.,
+					0., 0., 0.5, 3 + i,
 					0., 0., 0., 1.;
 				cube1->Set_Model_Matrix(t);
 			}
@@ -201,7 +211,7 @@ public:
 		//// You can temporarily uncomment the following line to visualize the parabola trajectory as a reference during implementation. 
 		//// Comment it out again once you complete the task.
 
-		//// Add_Arc_Trajectory();
+		// Add_Arc_Trajectory();
 
 		/* Your implementation starts. You may add/remove/edit any part of the code in the following. */
 		std::vector<float> time = { 0.2, 0.5, 0.8, 1.1, 1.4, 1.7 };
@@ -210,8 +220,8 @@ public:
 			auto bird = Add_Obj_Mesh_Object_From_File("bird.obj", OpenGLColor(1.f, 0.2f, 0.f, 1.f));
 			{
 				Matrix4f t;
-				t << 1., 0., 0., 0.,
-					0., 1., 0., 0.,
+				t << cos(150 * time[i] * pi / 180), sin(150 * time[i] * pi / 180), 0., -5. + 5. * time[i],
+					-sin(150 * time[i] * pi / 180), cos(150 * time[i] * pi / 180), 0., (9.8 * time[i]) - (0.5 * 9.8 * time[i] * time[i]),
 					0., 0., 1., 0.,
 					0., 0., 0., 1.;
 				bird->Set_Model_Matrix(t);
@@ -228,12 +238,211 @@ public:
 		/* Your implementation starts. You may add/remove/edit any part of the code in the following. */
 
 		//// draw the three axes, comment them out if you don't need them
-		Add_Coord({ Vector3(0, 0.01, 0), Vector3(5, 0.01, 0) }, OpenGLColor(1, 0, 0, 1));	//// X axis
-		Add_Coord({ Vector3(0, 0, 0), Vector3(0, 5, 0) }, OpenGLColor(0, 1, 0, 1));	//// Y axis
-		Add_Coord({ Vector3(0, 0.01, 0), Vector3(0, 0.01, 5) }, OpenGLColor(0, 0, 1, 1));	//// Z zxis
+		// Add_Coord({ Vector3(0, 0.01, 0), Vector3(5, 0.01, 0) }, OpenGLColor(1, 0, 0, 1));	//// X axis
+		// Add_Coord({ Vector3(0, 0, 0), Vector3(0, 5, 0) }, OpenGLColor(0, 1, 0, 1));	//// Y axis
+		// Add_Coord({ Vector3(0, 0.01, 0), Vector3(0, 0.01, 5) }, OpenGLColor(0, 0, 1, 1));	//// Z zxis
 
 		//// draw the ground, comment them out if you don't need them
-		Add_Ground();
+		// Add_Ground();
+
+		int scale = 1;
+		int xOffset = 0;
+		int yOffset = 0;
+		int zOffset = 0;
+		
+		Matrix4f rotate90y;
+		rotate90y << 0., 0., 1., 0.,
+			0., 1., 0., 0.,
+			-1., 0., 0., 0.,
+			0., 0., 0., 1.;
+
+		Matrix4f rotate45y;
+		rotate45y << sqrt(2) / 2., 0., sqrt(2) / 2., 0.,
+			0., 1., 0., 0.,
+			-sqrt(2) / 2., 0., sqrt(2) / 2., 0.,
+			0., 0., 0., 1.;
+
+		auto building1 = Add_Obj_Mesh_Object_From_File("building1.obj", OpenGLColor(0.84f, 0.37f, 0.31f, 1.f));
+		{
+			Matrix4f t;
+			t << 5. * scale, 0., 0., 0. + xOffset,
+				0., 5. * scale, 0., 1.2 + yOffset,
+				0., 0., 5. * scale, -7. + zOffset,
+				0., 0., 0., 1.;
+
+			building1->Set_Model_Matrix(t * rotate90y);
+		}
+
+		auto chair2 = Add_Obj_Mesh_Object_From_File("chair2.obj", OpenGLColor(0.44f, 0.13f, 0.17f, 1.f));
+		{
+			Matrix4f t;
+			t << 2. * scale, 0., 0., -1. + xOffset,
+				0., 2. * scale, 0., 1. + yOffset,
+				0., 0., 2. * scale, -7. + zOffset,
+				0., 0., 0., 1.;
+
+			chair2->Set_Model_Matrix(t * rotate90y * rotate90y);
+		}
+
+		for(int i = 0; i < 2; i++){
+			auto light1 = Add_Obj_Mesh_Object_From_File("light1.obj", OpenGLColor(0.95f, 0.82f, 0.90f, 1.f));
+			{
+				Matrix4f t;
+				t << 1.6 * scale, 0., 0., -3. + (6*i) + xOffset,
+					0., 1.6 * scale, 0., 0.9 + yOffset,
+					0., 0., 1.6 * scale, -5.8 + zOffset,
+					0., 0., 0., 1.;
+
+				light1->Set_Model_Matrix(t);
+			}
+		}
+
+		for(int i = 0; i < 7; i++){
+			for(int j = 0; j < 2; j++){
+				auto vase2 = Add_Obj_Mesh_Object_From_File("vase2.obj", OpenGLColor(0.59f, 0.26f, 0.35f, 1.f));
+				{
+					Matrix4f t;
+					t << 1.8 * scale, 0., 0., -3. + (6*j) + xOffset,
+						0., 1.8 * scale, 0., 0.5 + yOffset,
+						0., 0., 1.8 * scale, -3. + (2*i) + zOffset,
+						0., 0., 0., 1.;
+
+					vase2->Set_Model_Matrix(t * rotate90y);
+				}
+			}
+		}
+		
+		{
+			auto ground = Add_Obj_Mesh_Object_From_File("ground.obj", OpenGLColor(0.74f, 0.62f, 0.64f, 1.f));
+			Matrix4f t;
+			t << 5.3, 0., 0., 0.,
+				0., 20., 0., 0.005,
+				0., 0., 25., 0.,
+				0., 0., 0., 1.;
+
+			ground->Set_Model_Matrix(t);
+		}
+		
+		for(int i = 0; i < 2; i++){
+			auto fountain1 = Add_Obj_Mesh_Object_From_File("fountain1.obj", OpenGLColor(0.88f, 0.84f, 0.97f, 1.f));
+			{
+				Matrix4f t;
+				t << 3. * scale, 0., 0., -7. + (14*i) + xOffset,
+					0., 3. * scale, 0., 1.5 + yOffset,
+					0., 0., 3. * scale, 1.5 + zOffset,
+					0., 0., 0., 1.;
+
+				fountain1->Set_Model_Matrix(t);
+			}
+		}
+
+		for(int i = 0; i < 2; i++){
+			for(int j = 0; j < 2; j++){
+				auto chair3 = Add_Obj_Mesh_Object_From_File("chair3.obj", OpenGLColor(0.56f, 0.29f, 0.26f, 1.f));
+				{
+					Matrix4f t;
+					t << 1.9 * scale, 0., 0., -7. + (14*i) + xOffset,
+						0., 1.9 * scale, 0., 0.2 + yOffset,
+						0., 0., 1.9 * scale, -0.7 + (4.5*j) + zOffset,
+						0., 0., 0., 1.;
+
+					chair3->Set_Model_Matrix(t * rotate90y);
+				}
+			}
+		}
+
+		for(int i = 0; i < 2; i++){
+			for(int j = 0; j < 2; j++){
+				auto chair3 = Add_Obj_Mesh_Object_From_File("chair3.obj", OpenGLColor(0.56f, 0.29f, 0.26f, 1.f));
+				{
+					Matrix4f t;
+					t << 1.9 * scale, 0., 0., -9. + (14*i) + (4.1*j) + xOffset,
+						0., 1.9 * scale, 0., 0.2 + yOffset,
+						0., 0., 1.9 * scale, -0.7 + (4.5*0.5) + zOffset,
+						0., 0., 0., 1.;
+
+					chair3->Set_Model_Matrix(t);
+				}
+			}
+		}
+
+		for(int i = 0; i < 9; i++){
+			auto fence3 = Add_Obj_Mesh_Object_From_File("fence3.obj", OpenGLColor(0.56f, 0.29f, 0.26f, 1.f));
+			{
+				Matrix4f t;
+				t << 2.3 * scale, 0., 0., -9. + (2.3*i) + xOffset,
+					0., 2.3 * scale, 0., 0.7 + yOffset,
+					0., 0., 2.3 * scale, -10. + zOffset,
+					0., 0., 0., 1.;
+
+				fence3->Set_Model_Matrix(t * rotate90y * rotate90y);
+			}
+		}
+
+		for(int i = 0; i < 2; i++){
+			for(int j = 0; j < 6; j++){
+				for(int k = 0; k < 4; k++){
+					auto garden_tree1 = Add_Obj_Mesh_Object_From_File("garden_tree1.obj", OpenGLColor(0.8f, 0.82f, 0.47f, 1.f));
+					{
+						Matrix4f t;
+						t << 2. * scale, 0., 0., -9. + (13*i) + (1*j) + xOffset,
+							0., 2. * scale, 0., 0.7 + yOffset,
+							0., 0., 2. * scale, -9. + (1*k) + zOffset,
+							0., 0., 0., 1.;
+
+						garden_tree1->Set_Model_Matrix(t);
+					}
+				}
+			}
+		}
+
+		{
+			auto chair1 = Add_Obj_Mesh_Object_From_File("chair1.obj", OpenGLColor(0.78f, 0.69f, 0.87f, 1.f));
+			Matrix4f t;
+			t << 1.5 * scale, 0., 0., 6. + xOffset,
+				0., 1.5 * scale, 0., 0.4 + yOffset,
+				0., 0., 1.5 * scale, -3.7 + zOffset,
+				0., 0., 0., 1.;
+
+			chair1->Set_Model_Matrix(t);
+		}
+
+		{
+			auto chair1 = Add_Obj_Mesh_Object_From_File("chair1.obj", OpenGLColor(0.78f, 0.69f, 0.87f, 1.f));
+			Matrix4f t;
+			t << 1.5 * scale, 0., 0., 7.5 + xOffset,
+				0., 1.5 * scale, 0., 0.4 + yOffset,
+				0., 0., 1.5 * scale, -3.1 + zOffset,
+				0., 0., 0., 1.;
+
+			chair1->Set_Model_Matrix(t * rotate45y * rotate90y * rotate90y * rotate90y);
+		}
+
+		for(int i = 0; i < 2; i++){
+			for(int j = 0; j < 2; j++){
+				auto chair4 = Add_Obj_Mesh_Object_From_File("chair4.obj", OpenGLColor(0.56f, 0.29f, 0.26f, 1.f));
+				{
+					Matrix4f t;
+					t << 2.5 * scale, 0., 0., -8. + (13*i) + (3.2*j) + xOffset,
+						0., 2.5 * scale, 0., 0.45 + yOffset,
+						0., 0., 2.5 * scale, 7. + zOffset,
+						0., 0., 0., 1.;
+
+					chair4->Set_Model_Matrix(t);
+				}
+			}
+		}
+
+		{
+			auto ground = Add_Obj_Mesh_Object_From_File("ground.obj", OpenGLColor(.51f, .56f, .24f, 1.f));
+			Matrix4f t;
+			t << 20., 0., 0., 0.,
+				0., 20., 0., 0.,
+				0., 0., 25., 0.,
+				0., 0., 0., 1.;
+
+			ground->Set_Model_Matrix(t);
+		}
 
 		/* Your implementation ends. */
 	}
