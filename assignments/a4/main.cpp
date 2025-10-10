@@ -81,15 +81,29 @@ public:
 
         //// Step 7: Add your customized mesh objects and specify their transform and material properties by mimicking Create_Bunny_Scene() 
         /* Your implementation starts */
+        Create_Background(OpenGLColor(0.1f, 0.1f, 0.1f, 1.f), OpenGLColor(0.1f, 0.1f, .3f, 1.f));   //// add background
 
+        auto snail = Add_Obj_Mesh_Object("snail.obj");
+        //// set transform
+        Matrix4f t3;
+        t3 << -0.7, 0., 0., 0.1,
+            0., 0.7, 0., -1.,
+            0., 0., -0.7, 0.,
+            0., 0., 0., 1.0;
+        snail->Set_Model_Matrix(t3);
+        //// set material properties
+        snail->Set_Ka(Vector3f(0.25f, 0.15f, 0.1f));
+        snail->Set_Kd(Vector3f(0.68f, 0.38f, 0.23f));
+        snail->Set_Ks(Vector3f(5.f, 5.f, 5.f));
+        snail->Set_Shininess(128.f);
         /* Your implementation ends */
     }
 
     //// Step 7: Comment out Create_Bunny_Scene() and uncomment Create_Shining_Scene() for your customized scene.
     virtual void Initialize_Data()
     {
-        Create_Bunny_Scene();               //// TODO: comment out this line for your customized scene
-        //Create_Shining_Scene();           //// TODO: uncomment this line for your customized scene
+        // Create_Bunny_Scene();               //// TODO: comment out this line for your customized scene
+        Create_Shining_Scene();           //// TODO: uncomment this line for your customized scene
 
         OpenGLShaderLibrary::Instance()->Add_Shader_From_File("a4_vert.vert", "a4_frag.frag", "a4_shader");
         for (auto& mesh_obj : mesh_object_array) {
