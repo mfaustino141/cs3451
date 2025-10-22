@@ -92,14 +92,37 @@ public:
 
         //// Step 5: Add your customized mesh objects and specify their transform, material, and texture properties by mimicking Create_Bunny_Scene() 
         /* Your implementation starts */
+        //// initialize Rome Helmet
+        {
+            //// initialize mesh
+            auto RomeHelmet = Add_Obj_Mesh_Object("RomeHelmet.obj");
+            RomeHelmet->name = "RomeHelmet"; //// Must set name for the object
 
+            //// initialize transform
+            Matrix4f t;
+            t << 1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1;
+            RomeHelmet->Set_Model_Matrix(t);
+
+            //// initialize material
+            RomeHelmet->Set_Ka(Vector3f(0.2, 0.2, 0.2));
+            RomeHelmet->Set_Kd(Vector3f(0.6, 0.5, 0.4));
+            RomeHelmet->Set_Ks(Vector3f(1.8, 1.8, 1.8));
+            RomeHelmet->Set_Shininess(128.);
+
+            //// initialize texture
+            Add_Textture_For_Mesh_Object(RomeHelmet, "RomeHelmet_color.jpg", TexType::Color);
+            Add_Textture_For_Mesh_Object(RomeHelmet, "RomeHelmet_normal.png", TexType::Normal);
+        }
         /* Your implementation ends */
     }
 
     virtual void Initialize_Data() 
     {
-        Create_Bunny_Scene();           //// TODO: comment out this line for your customized scene
-        // Create_Old_Object_Scene();   //// TODO: uncomment this line for your customized scene
+        // Create_Bunny_Scene();           //// TODO: comment out this line for your customized scene
+        Create_Old_Object_Scene();   //// TODO: uncomment this line for your customized scene
 
         ////initialize shader
         OpenGLShaderLibrary::Instance()->Add_Shader_From_File("a5_vert.vert", "a5_frag.frag", "a5_shader");
