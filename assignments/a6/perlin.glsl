@@ -1,4 +1,4 @@
-// #define Terrain 1		/* Uncomment this macro for Step II */
+#define Terrain 1		/* Uncomment this macro for Step II */
 
 struct Light 
 {
@@ -31,6 +31,12 @@ vec2 hash2(vec2 v)
 	// Provided defulat implementation
 	// rand  = 52.5 * fract(v.yx * 0.31 + vec2(0.31, 0.113));
     // rand = -1.0 + 3.1 * fract(rand.x * rand.y * rand.yx);
+
+	// Link for Hash() implementation: https://www.shadertoy.com/view/tdG3Rd
+    float x = fract(sin(dot(v, vec2(12.9898, 78.233))) * 43758.5453);
+    float y = fract(sin(dot(v, vec2(39.3468, 11.135))) * 96321.9754);
+	
+    return vec2(x, y) * 2.0 - 1.0;
 	
 	/* Your implementation ends */
 
@@ -51,8 +57,21 @@ float perlin_noise(vec2 p)
     vec2 f = fract(p);
 	
 	/* Your implementation starts */
-    
+    vec2 s = f * f * (3.0 - 2.0 * f);
 
+	vec2 g00 = hash2(i);
+    vec2 g10 = hash2(i + vec2(1.0, 0.0));
+    vec2 g01 = hash2(i + vec2(0.0, 1.0));
+    vec2 g11 = hash2(i + vec2(1.0, 1.0));
+
+    vec2 f00 = f - vec2(0.0, 0.0);
+    vec2 f10 = f - vec2(1.0, 0.0);
+    vec2 f01 = f - vec2(0.0, 1.0);
+    vec2 f11 = f - vec2(1.0, 1.0);
+
+    float nx0 = mix(dot(g00, f00), dot(g10, f10), s.x);
+    float nx1 = mix(dot(g01, f01), dot(g11, f11), s.x);
+    noise = mix(nx0, nx1, s.y);
 	/* Your implementation ends */
 	
 	return noise;
@@ -71,8 +90,9 @@ float noise_octave(vec2 p, int num)
 	float sum = 0;
 	
 	/* Your implementation starts */
-
-	
+	for(int i = 0; i < num; i++){
+		sum += pow(2.0, -float(i)) * perlin_noise(pow(2.0, float(i)) * p);
+	}
 	/* Your implementation ends */
 	
 	return sum;
@@ -97,6 +117,9 @@ float height(vec2 v)
 	// Provided default implementation
 	// h = 0.75 * noise_octave(v, 10);
 	// if(h<0) h *= .5;
+
+	h = exp(noise_octave(v * 0.9, 10)) - 1.0; 
+	if(h < 0) h *= 0.1;
 	
 	/* Your implementation ends */
 	
@@ -116,8 +139,15 @@ vec3 compute_normal(vec2 v, float d)
 	vec3 normal_vector = vec3(0,0,0);
 	
 	/* Your implementation starts */
+    vec3 v1 = vec3(v.x + d, v.y, height(vec2(v.x + d, v.y)));
+    vec3 v2 = vec3(v.x - d, v.y, height(vec2(v.x - d, v.y)));
+    vec3 v3 = vec3(v.x, v.y + d, height(vec2(v.x, v.y + d)));
+    vec3 v4 = vec3(v.x, v.y - d, height(vec2(v.x, v.y - d)));
 
-	
+    vec3 dx = v1 - v2;
+    vec3 dy = v3 - v4;
+
+    normal_vector = normalize(cross(dx, dy));
 	/* Your implementation ends */
 	
 	return normal_vector;
@@ -145,8 +175,14 @@ vec4 shading_phong(Light light, vec3 e, vec3 p, vec3 s, vec3 n)
 	vec4 color=vec4(0.0,0.0,0.0,1.0);
 	
     /* your implementation starts */
-    
-    
+    vec3 l = normalize(s - p);
+    float nDotl = max(dot(n, l), 0.0);
+    vec3 v = normalize(e - p);
+    vec3 r = reflect(-l, n);
+    float vDotr = max(dot(v, r), 0.0);
+
+    vec3 LPhong = (ka * light.Ia) + (kd * light.Id * nDotl) + (ks * light.Is * pow(vDotr, shininess));
+	color = vec4(LPhong, 1.f);
 	/* your implementation ends */
 	
 	return color;
@@ -188,6 +224,24 @@ vec3 shading_terrain(vec3 pos)
 	// h = clamp(h, 0.0, 1.0);
 	// emissive_color = mix(vec3(.4,.6,.2), vec3(.4,.3,.2), h);
 
+    float h = clamp(pos.z, 0.0, 1.0);
+
+    vec3 water_color = vec3(0.05, 0.1, 0.2);
+    vec3 grass_color = vec3(0.15, 0.25, 0.1);
+    vec3 rock_color = vec3(0.35, 0.28, 0.2);
+    vec3 light_rock_color = vec3(0.45, 0.45, 0.4);
+    vec3 snow_color = vec3(0.9, 0.9, 0.9);
+
+    if (h < 0.03)
+        emissive_color = water_color;
+    else if (h < 0.04)
+        emissive_color = mix(water_color, grass_color, smoothstep(0.03, 0.04, h));
+    else if (h < 0.6)
+        emissive_color = mix(grass_color, rock_color, smoothstep(0.04, 0.6, h));
+    else if (h < 0.85)
+        emissive_color = mix(rock_color, light_rock_color, smoothstep(0.6, 0.8, h));
+    else
+        emissive_color = mix(light_rock_color, snow_color, smoothstep(0.85, 1.0, h));
 	/* your implementation ends */
 
 	return phong_color * emissive_color;
