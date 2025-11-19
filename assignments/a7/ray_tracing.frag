@@ -9,6 +9,10 @@ out vec4 fragColor;
 uniform sampler2D bufferTexture;
 uniform sampler2D floor_color;
 
+uniform sampler2D sphere0_tex;
+uniform sampler2D sphere1_tex;
+uniform sampler2D sphere2_tex;
+
 #define M_PI 3.1415925585
 #define Epsilon 1e-6
 
@@ -191,15 +195,15 @@ Hit hitPlane(const Ray r, const Plane pl)
     
     //// uncomment the following lines and run the code
 
-    // float t = dot(pl.p - r.ori, pl.n) / dot(r.dir, pl.n);
+    float t = dot(pl.p - r.ori, pl.n) / dot(r.dir, pl.n);
 
-    // if(t <= 0.0) 
-    //    return noHit;
+    if(t <= 0.0) 
+       return noHit;
 
-    // vec3 hitP = r.ori + t * r.dir;
-    // vec3 normal = pl.n;
+    vec3 hitP = r.ori + t * r.dir;
+    vec3 normal = pl.n;
 
-    // hit = Hit(t, hitP, normal, pl.matId);
+    hit = Hit(t, hitP, normal, pl.matId);
 
     /* default implementation ends */
     
@@ -220,7 +224,31 @@ Hit hitSphere(const Ray r, const Sphere s)
     Hit hit = noHit;
 	
     /* your implementation starts */
+    float A = dot(r.dir, r.dir);
+    float B = 2.0 * dot(r.dir, r.ori - s.ori);
+    float C = dot(r.ori - s.ori, r.ori - s.ori) - s.r * s.r;
 
+    float discriminant = B * B - 4.0 * A * C;
+    if (discriminant < 0.0) {
+        return noHit;
+    }
+
+    float sqrtDiscriminant = sqrt(discriminant);
+    float t0 = (-B - sqrtDiscriminant) / (2.0 * A);
+    float t1 = (-B + sqrtDiscriminant) / (2.0 * A);
+
+    float t = t0;
+    if (t < 0.0) {
+        t = t1;
+        if (t < 0.0) {
+            return noHit;
+        }
+    }
+
+    vec3 hitP = r.ori + t * r.dir;
+    vec3 normal = normalize(hitP - s.ori);
+
+    hit = Hit(t, hitP, normal, s.matId);
 	/* your implementation ends */
     
 	return hit;
@@ -270,7 +298,15 @@ vec3 shadingPhong(Light light, int matId, vec3 e, vec3 p, vec3 s, vec3 n)
     float shininess = materials[matId].shininess;
     
     /* your implementation starts */
-	
+    vec3 kd_textured = sampleDiffuse(matId, p);
+    vec3 l = normalize(s - p);
+    float nDotl = max(dot(n, l), 0.0);
+    vec3 v = normalize(e - p);
+    vec3 r = reflect(-l, n);
+    float vDotr = max(dot(v, r), 0.0);
+
+    vec3 LPhong = (ka * light.Ia) + (kd_textured * light.Id * nDotl) + (ks * light.Is * pow(vDotr, shininess));
+	color = vec3(LPhong);
 	/* your implementation ends */
     
 	return color;
@@ -292,12 +328,39 @@ vec3 sampleDiffuse(int matId, vec3 p)
 		vec2 uv = vec2(p.x, p.z) / 5.0;     /* uv texture on the ground */
 
         /* your implementation starts */
-        
-        
+        vec3 tex_color = texture(floor_color, uv).rgb;
+        color = mat_color * tex_color;
 		/* your implementation ends */
     }
 
     /* no texture for the spheres */
+    // applying textures for spheres
+    if(matId == 1) {
+        vec3 d = normalize(p - spheres[0].ori);
+        float u = 0.5 + atan(d.z, d.x) / (2.0 * M_PI);
+        float v = 0.5 - asin(d.y) / M_PI;
+        vec3 tex_color = texture(sphere0_tex, vec2(u, v)).rgb;
+        color = tex_color;
+        return color;
+    }
+
+    if(matId == 2) {
+        vec3 d = normalize(p - spheres[1].ori);
+        float u = 0.5 + atan(d.z, d.x) / (2.0 * M_PI);
+        float v = 0.5 - asin(d.y) / M_PI;
+        vec3 tex_color = texture(sphere1_tex, vec2(u, v)).rgb;
+        color = tex_color;
+        return color;
+    }
+
+    if(matId == 3) {
+        vec3 d = normalize(p - spheres[2].ori);
+        float u = 0.5 + atan(d.z, d.x) / (2.0 * M_PI);
+        float v = 0.5 - asin(d.y) / M_PI;
+        vec3 tex_color = texture(sphere2_tex, vec2(u, v)).rgb;
+        color = tex_color;
+        return color;
+    }
     
     return color;
 }
@@ -320,8 +383,11 @@ bool isShadowed(Light light, Hit h)
 	vec3 dir = normalize(toLight);                  /* direction of toLight */
 	
     /* your implementation starts */
-	
-    
+    Ray shadowRay = Ray(intersect + dir * Epsilon, dir);
+    Hit shadowHit = findHit(shadowRay);
+    if (shadowHit.t > Epsilon && shadowHit.t < t_max) {
+        shadowed = true;
+    }
 	/* your implementation ends */
     
 	return shadowed;
@@ -372,7 +438,7 @@ vec3 rayTrace(in Ray r, out Hit hit)
 
 /* your implementation starts */
 
-const int recursiveDepth = 1;
+const int recursiveDepth = 50;
 
 /* your implementation ends */
 
@@ -412,6 +478,8 @@ void main()
         vec3 reflected_dir = vec3(0);           /* calculate the reflected dir */
 
 		/* your implementation starts */
+        reflected_dir = normalize(incoming_dir - 2.0 * dot(incoming_dir, normal) * normal);
+        recursiveRay = Ray(intersect + reflected_dir * Epsilon, reflected_dir);
         
 		/* your implementation ends */
     }

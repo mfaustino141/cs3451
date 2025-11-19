@@ -39,9 +39,19 @@ public:
         Set_Polygon_Mode(screen_cover, PolygonMode::Fill);
         Uniform_Update();
         // Add texture
-        OpenGLTextureLibrary::Instance()->Add_Texture_From_File("floor.jpg", "floor_color");
+        OpenGLTextureLibrary::Instance()->Add_Texture_From_File("newFloor.jpg", "floor_color");
         screen_cover->Add_Texture("floor_color", OpenGLTextureLibrary::Get_Texture("floor_color"));
         
+        // load sphere textures
+        OpenGLTextureLibrary::Instance()->Add_Texture_From_File("sphere0.jpg", "sphere0_color");
+        OpenGLTextureLibrary::Instance()->Add_Texture_From_File("sphere1.jpg", "sphere1_color");
+        OpenGLTextureLibrary::Instance()->Add_Texture_From_File("sphere2.jpg", "sphere2_color");
+
+        // attach textures to screen shader
+        screen_cover->Add_Texture("sphere0_tex", OpenGLTextureLibrary::Get_Texture("sphere0_color"));
+        screen_cover->Add_Texture("sphere1_tex", OpenGLTextureLibrary::Get_Texture("sphere1_color"));
+        screen_cover->Add_Texture("sphere2_tex", OpenGLTextureLibrary::Get_Texture("sphere2_color"));
+
         screen_cover->use_tex = true;
         screen_cover->Set_Data_Refreshed();
         screen_cover->Initialize();
